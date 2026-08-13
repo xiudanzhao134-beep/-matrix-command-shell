@@ -32,7 +32,40 @@ button{border:1px solid #37728e;background:#082334;color:#eaffff;border-radius:9
 .empty{text-align:center;padding:50px 15px}.empty .icon{font-size:50px}.empty p{font-size:11px;color:#8fb3c3;line-height:1.7}
 .nav{position:fixed;bottom:0;left:0;right:0;height:66px;background:#06131df4;backdrop-filter:blur(13px);border-top:1px solid #1c4254;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:none;color:#7599aa;border-radius:0;padding:6px 1px;font-size:16px}.nav button.on{color:#61ddff}.nav span{display:block;font-size:8px;margin-top:1px}
 @media(max-width:760px){.wrap{padding:8px}.modules{grid-template-columns:1fr}.works{grid-template-columns:repeat(3,1fr)}.alloc{grid-template-columns:1fr}.stats{grid-template-columns:repeat(4,1fr)}.drawer{width:100vw}}
-</style></head><body>
+</style>
+<style>
+.camp-map{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:8px}
+.camp-card{
+  position:relative;overflow:hidden;border:1px solid #2a5871;border-radius:14px;
+  padding:10px;background:linear-gradient(180deg,#0a1e2a,#06141e);
+  min-height:150px;box-shadow:inset 0 0 24px #0b2a3b55,0 0 18px #0005
+}
+.camp-card:before{content:"";position:absolute;inset:-40% auto auto -20%;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,#57d8ff22,transparent 65%);pointer-events:none}
+.camp-title{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.camp-title b{font-size:13px;letter-spacing:.5px}
+.camp-title span{font-size:9px;border:1px solid #315e74;border-radius:999px;padding:3px 6px;color:#a7cad8}
+.camp-sub{color:#84aebe;font-size:9px;line-height:1.45;margin-top:3px}
+.camp-units{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.camp-unit{width:52px;text-align:center;position:relative;cursor:pointer}
+.camp-unit .avatar{width:38px;height:38px;margin:auto}
+.camp-unit small{display:block;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.camp-unit em{position:absolute;right:0;top:-4px;font-style:normal;font-size:7px;background:#07151f;border:1px solid #3d6c83;border-radius:999px;padding:2px 4px;color:#d7f4ff}
+.camp-S{border-color:#ef5f5f;box-shadow:inset 0 0 25px #7b171744,0 0 20px #ff4e4e18}
+.camp-A{border-color:#d9a93b;box-shadow:inset 0 0 25px #72581733,0 0 20px #ffc84b14}
+.camp-B{border-color:#3d9ce0;box-shadow:inset 0 0 25px #15517c33,0 0 20px #55b9ff14}
+.camp-C{border-color:#6889a6}
+.camp-NEW{border-color:#8f6ad8}
+.camp-RED{border-color:#a94b5e}
+.war-order{border:1px solid #355e72;border-radius:11px;padding:9px;margin-top:9px;background:#071a25}
+.war-order b{font-size:10px}.war-order p{margin:4px 0 0;color:#91b7c8;font-size:9px;line-height:1.5}
+@media(max-width:760px){
+  .camp-map{grid-template-columns:1fr 1fr;gap:7px}
+  .camp-card{padding:9px;min-height:145px}
+  .camp-unit{width:47px}.camp-unit .avatar{width:35px;height:35px}
+}
+</style>
+
+</head><body>
 <header><h1>项目作战指挥台</h1><div class="sub">私人数据本地导入 · 多模块统筹 · KPI驱动决策</div></header>
 <div class="wrap"><div class="privacy">🔐 公开网页仅包含界面代码，不包含账号、模板、目标、经营数据或项目明细。私人数据包导入后只保存在当前浏览器本地。</div><main id="app"></main></div>
 <input id="file" type="file" accept=".json,application/json" hidden>
@@ -45,7 +78,7 @@ button{border:1px solid #37728e;background:#082334;color:#eaffff;border-radius:9
 <button onclick="tab('acq',this)">🔗<span>获客</span></button>
 </nav>
 <script>
-const KEY='matrix_private_pack_v5';let P=null,view='overview',filter='全部',pubFilter='全部';
+const KEY='matrix_private_pack_v5';let P=null,view='overview',filter='全部';
 const fmt=n=>n===null||n===undefined||!Number.isFinite(Number(n))?'—':(Math.abs(Number(n))>=10000?(Number(n)/10000).toFixed(Number(n)>=100000?1:2).replace(/\.0+$/,'')+'万':Math.round(Number(n)).toLocaleString('zh-CN'));
 const pct=v=>v===null||v===undefined||!Number.isFinite(Number(v))?'—':((Number(v)>=0?'+':'')+(Number(v)*100).toFixed(1)+'%');
 const idx=v=>v===null||v===undefined||!Number.isFinite(Number(v))?'—':Number(v).toFixed(2)+'×';
@@ -61,7 +94,7 @@ function bar(p){return `<div class="bar"><i style="width:${Math.max(0,Math.min(1
 function render(){const app=document.getElementById('app');if(!P){app.innerHTML=`<section class="sec empty"><div class="icon">🛰️</div><h2>导入私人数据包</h2><p>导入后即可看到项目总控、账号矩阵、近7日公域结果、KPI进度与具体决策。</p><button class="primary" onclick="importPack()">导入私人数据包</button></section>`;return}({overview,shooting,matrix,kpi,acq}[view])(app)}
 function overview(app){
  const o=P.meta.projectOverview,k=P.kpi,c=P.meta.publicCoverage||{};
- app.innerHTML=`<div class="stats"><div class="stat">周播放<b>${fmt(o.play)}</b></div><div class="stat">周涨粉<b>${fmt(o.netFollow)}</b></div><div class="stat">公域检索<b>${c.searched||0}/${c.total||0}</b></div><div class="stat">近7日可呈现<b>${c.rich7dAccounts||0}</b></div></div>
+ app.innerHTML=`<div class="stats"><div class="stat">周播放<b>${fmt(o.play)}</b></div><div class="stat">周涨粉<b>${fmt(o.netFollow)}</b></div><div class="stat">主力军S<b>${P.D.camps.S.accounts.length}</b></div><div class="stat">先锋营A<b>${P.D.camps.A.accounts.length}</b></div></div>
  <section class="sec"><h2>三大工作板块</h2><div class="modules">${P.project.modules.map(m=>`<div class="module" onclick="jump('${m.key}')"><b>${m.name}</b><p>${m.summary}</p></div>`).join('')}</div></section>
  <section class="sec"><h2>月度KPI总控</h2><div class="kpis">${k.items.slice(0,4).map(x=>`<div class="kcard"><b>${x.name} · 权重${x.weight}%</b><div class="num">${x.done==null?(x.status?'待确认':'—'):(x.unit==='条'?`${x.done}/${x.target}`:fmt(x.done))}</div>${x.progress==null?'':bar(x.progress)}<div class="muted">${x.progress==null?(x.status||''):`完成 ${(x.progress*100).toFixed(1)}% · 缺口 ${fmt(x.gap)}`}</div></div>`).join('')}</div><div class="warn" style="margin-top:8px">${k.pace.note}<br>当前曝光缺口 ${fmt(k.pace.remainingExposure)}；按尚未回收周期折算需 ${fmt(k.pace.needDaily)}/天。</div></section>
  <section class="sec"><h2>当前优先级</h2>${(P.project.todayActions||[]).map(x=>`<div class="decision"><b>${x}</b></div>`).join('')}</section>`;
@@ -70,22 +103,60 @@ function jump(k){view=k==='shooting'?'shooting':k==='matrix'?'matrix':'acq';cons
 function shooting(app){const s=P.shooting;app.innerHTML=`<section class="sec"><h2>拍摄作战室</h2><div class="stats"><div class="stat">上次拍摄<b>${s.lastShoot}</b></div><div class="stat">下次预估<b>${s.nextEstimate}</b></div><div class="stat">建议备拍<b>${s.nextScriptPack.total}</b></div><div class="stat">验证/新内容<b>${s.nextScriptPack.verified}/${s.nextScriptPack.new}</b></div></div><p class="muted">${s.lastPrep}<br>${s.coreRule}</p></section><section class="sec"><h2>下一期脚本结构</h2><div class="alloc">${s.nextScriptPack.categories.map(c=>`<div><b>${c.name} · ${c.count}条</b><ul>${c.examples.map(e=>`<li>${e}</li>`).join('')}</ul></div>`).join('')}</div></section><section class="sec"><h2>最近内容信号 → 下一拍怎么选</h2>${s.signals.map(x=>`<div class="decision gold"><b>${x.title}</b><p>${x.evidence}</p></div>`).join('')}</section><section class="sec"><h2>拍摄周期SOP</h2><div class="timeline">${s.cycle.map(x=>`<b>${x.when}</b><div>${x.task}</div>`).join('')}</div></section>`}
 function matrix(app){
  const fs=['全部','主力放量','扩量验证','高体量修复','守盘','恢复观察','暂停优质素材','账号健康优先'];
- const ps=['全部','近7日已呈现','历史公域命中','近7日未稳定索引'];
- const c=P.meta.publicCoverage||{};
- app.innerHTML=`<section class="sec"><h2>账号矩阵</h2><div class="muted">头像=当前模板。67/67已做公域检索；只把能稳定归属的结果放进对应账号，不把同名无关结果硬绑。</div>
- <div class="stats" style="margin:8px 0"><div class="stat">已搜<b>${c.searched||0}</b></div><div class="stat">近7日可呈现<b>${c.rich7dAccounts||0}</b></div><div class="stat">历史命中<b>${c.historicalEvidenceAccounts||0}</b></div><div class="stat">未稳定索引<b>${c.noStableIndexAccounts||0}</b></div></div>
- <div class="muted">决策筛选</div><div class="controls">${fs.map(f=>`<button class="chip ${filter===f?'on':''}" onclick="setFilter('${f}')">${f}</button>`).join('')}</div>
- <div class="muted">公域覆盖</div><div class="controls">${ps.map(f=>`<button class="chip ${pubFilter===f?'on':''}" onclick="setPubFilter('${f}')">${f}</button>`).join('')}</div>
- <input id="q" class="search" placeholder="搜索账号 / 平台 / 模板" oninput="searchRows()"><div id="rows"></div></section>`;searchRows()
+ app.innerHTML=`<section class="sec"><h2>矩阵排兵布阵</h2>
+ <div class="muted">“全部”按老板版战区看：S主力军 / A先锋营 / B试验营 / C观察营 / 新兵 / 异常池。选择其他标签时，再切换到具体运营动作分类。</div>
+ <div class="controls" style="margin-top:8px">${fs.map(f=>`<button class="chip ${filter===f?'on':''}" onclick="setFilter('${f}')">${f}</button>`).join('')}</div>
+ <input id="q" class="search" placeholder="搜索账号 / 平台 / 模板" oninput="renderMatrixBody()">
+ <div id="matrixBody"></div></section>`;
+ renderMatrixBody()
 }
 function setFilter(f){filter=f;matrix(document.getElementById('app'))}
-function setPubFilter(f){pubFilter=f;matrix(document.getElementById('app'))}
-function badge(a){const x=a.publicCoverage||'近7日未稳定索引';return `<span class="badge ${x==='近7日已呈现'?'good':x==='历史公域命中'?'hist':''}">${x}</span>`}
-function searchRows(){const box=document.getElementById('rows');if(!box)return;const q=(document.getElementById('q').value||'').toLowerCase();let xs=accts();if(filter!=='全部')xs=xs.filter(a=>a.decisionAction===filter);if(pubFilter!=='全部')xs=xs.filter(a=>a.publicCoverage===pubFilter);xs=xs.filter(a=>[a.name,a.platform,a.template,a.role].join(' ').toLowerCase().includes(q));box.innerHTML=xs.map(a=>`<div class="row" onclick='openId(${JSON.stringify(a.id)})'>${av(a)}<div><b>${a.name}</b><div class="muted">${a.platform} · ${a.template||'—'}<br>${a.decisionAction}</div>${badge(a)}</div><div class="mini"><b>${fmt(a.play)}</b>${pct(a.wow)} · ${idx(a.performanceIndex)}</div></div>`).join('')}
+function renderMatrixBody(){
+ const box=document.getElementById('matrixBody'); if(!box)return;
+ const q=(document.getElementById('q').value||'').toLowerCase();
+ if(filter==='全部'){
+   const order=['S','A','B','C','NEW','RED'];
+   box.innerHTML=`<div class="camp-map">${order.map(k=>{
+     const c=P.D.camps[k];
+     const xs=c.accounts.filter(a=>[a.name,a.platform,a.template,a.role].join(' ').toLowerCase().includes(q));
+     return `<div class="camp-card camp-${k}">
+       <div class="camp-title"><b style="color:${c.color||'#eaf7ff'}">${c.name}</b><span>${xs.length}个</span></div>
+       <div class="camp-sub">${c.subtitle||''}</div>
+       <div class="camp-units">${xs.slice(0,12).map(a=>`<div class="camp-unit" onclick='openId(${JSON.stringify(a.id)})'>${av(a)}<em>${fmt(a.play)}</em><small>${a.name}</small></div>`).join('')}</div>
+       ${xs.length>12?`<div class="muted" style="margin-top:7px">还有 ${xs.length-12} 个账号，点搜索可快速定位</div>`:''}
+       <div class="war-order"><b>作战口令</b><p>${c.command||c.subtitle||''}</p></div>
+     </div>`
+   }).join('')}</div>`;
+   return;
+ }
+ let xs=accts().filter(a=>a.decisionAction===filter);
+ xs=xs.filter(a=>[a.name,a.platform,a.template,a.role].join(' ').toLowerCase().includes(q));
+ box.innerHTML=xs.map(a=>`<div class="row" onclick='openId(${JSON.stringify(a.id)})'>${av(a)}<div><b>${a.name}</b><div class="muted">${a.platform} · ${a.template||'—'}<br>${a.decisionAction}</div></div><div class="mini"><b>${fmt(a.play)}</b>${pct(a.wow)} · ${idx(a.performanceIndex)}</div></div>`).join('') || `<div class="muted" style="padding:14px 0">当前筛选暂无账号</div>`;
+}
 function kpi(app){const k=P.kpi,d=P.decision;app.innerHTML=`<section class="sec"><h2>KPI缺口与速度</h2><div class="kpis">${k.items.map(x=>`<div class="kcard"><b>${x.name} · ${x.weight}%</b><div class="num">${x.done==null?'待确认':(x.unit==='条'?`${x.done}/${x.target}`:fmt(x.done))}</div>${x.progress==null?'':bar(x.progress)}<div class="muted">${x.progress==null?(x.status||''):`完成 ${(x.progress*100).toFixed(1)}% · 缺口 ${fmt(x.gap)}`}</div></div>`).join('')}</div></section><section class="sec"><h2>增量预算怎么分</h2>${d.exposureBudget.allocation.map(x=>`<div class="decision"><b>${x.bucket} · ${(x.share*100).toFixed(0)}% ≈ ${fmt(x.increment)}/周</b><p>${x.rule}</p></div>`).join('')}</section><section class="sec"><h2>四支战队</h2>${d.squads.map(s=>`<div class="decision ${s.color}"><b>${s.name}｜${s.goal}</b><p>${s.action}</p><div class="muted">${s.accounts.map(a=>`${a.name}(${fmt(a.play)})`).join(' · ')}</div></div>`).join('')}</section><section class="sec"><h2>爆款攻坚</h2>${d.viralPlan.map(x=>`<div class="decision"><b>${x}</b></div>`).join('')}</section><section class="sec"><h2>我采用的运营判断框架</h2>${(d.methodNotes||[]).map((x,i)=>`<div class="decision"><b>${i+1}. ${x}</b></div>`).join('')}</section><section class="sec"><h2>内部判断规则</h2>${d.operatorRules.map((x,i)=>`<div class="decision"><b>${i+1}. ${x}</b></div>`).join('')}</section>`}
 function acq(app){const a=P.acquisition;app.innerHTML=`<section class="sec"><h2>获客总控</h2><div class="stats"><div class="stat">目标<b>${a.targetA}</b></div><div class="stat">核心账号<b>${a.accountCount}</b></div><div class="stat">渠道A<b>${a.channels.douyin.channel}</b></div><div class="stat">渠道B<b>${a.channels.video.channel}</b></div></div><div class="warn" style="margin-top:8px">${a.status}</div></section><section class="sec"><h2>最新获客账号</h2>${a.groups.map(g=>`<div class="acqgroup"><b>${g.name}</b>${g.accounts.map(x=>`<div class="acqacc"><span>${x.platform} · ${x.name}</span><span>${x.template||''}</span></div>`).join('')}</div>`).join('')}</section><section class="sec"><h2>链路巡检SOP</h2>${a.workflow.map((x,i)=>`<div class="decision"><b>${i+1}. ${x}</b></div>`).join('')}</section>`}
-function worksHtml(a){const p=a.publicSearchV4||{},w=p.recentWorks||[];let body='';if(w.length){body=`<div class="works">${w.map(x=>`<div class="work">${x.coverData?`<img src="${x.coverData}">`:`<div class="fake">${x.title||'作品数据卡'}<br><br>公域未取得稳定封面</div>`}<div class="cap">${x.coverData?(x.title||''):''}<div class="metrics">${x.play!=null?`<span>播 ${fmt(x.play)}</span>`:''}${x.likes!=null?`<span>赞 ${fmt(x.likes)}</span>`:''}${x.comments!=null?`<span>评 ${fmt(x.comments)}</span>`:''}${x.shares!=null?`<span>转 ${fmt(x.shares)}</span>`:''}${x.favorites!=null?`<span>藏 ${fmt(x.favorites)}</span>`:''}${x.followGain!=null?`<span>涨粉 ${fmt(x.followGain)}</span>`:''}</div></div></div>`).join('')}</div>`}else body=`<div class="muted">已完成账号名+平台检索，但近7日没有取得可稳定归属到此账号的主页/作品索引。此结果不会跳转让你自己再搜，也不会用同名无关账号凑数。</div>`;const hist=(p.historicalEvidence||[]).map(x=>`<div class="decision"><b>历史公域命中：${x.title}</b><p>${x.metric||''} · ${x.source||''}</p></div>`).join('');return `<section class="sec"><h2>近7日作品 / 公域结果</h2><div class="signal"><b>${p.status||'已完成公域检索'}</b><br>${p.summary||''}</div>${body}${hist}<div class="source-note">${P.meta.publicSearchNote||''}</div></section>`}
-function openAccount(a){document.getElementById('drawerBody').innerHTML=`<div class="hero">${av(a)}<div><h2>${a.name}</h2><div class="muted">${a.platform} · ${a.grade}级<br>模板：${a.template||'—'}</div>${badge(a)}</div></div><div class="signal ${a.decisionColor||''}"><b>${a.decisionAction||'常规测试'}</b><br>${a.decisionDetail||''}</div><div class="intel"><div class="cell"><small>周播放</small><b>${fmt(a.play)}</b></div><div class="cell"><small>周涨粉</small><b>${fmt(a.netFollow)}</b></div><div class="cell"><small>对自身基准</small><b>${idx(a.performanceIndex)}</b></div><div class="cell"><small>周环比</small><b>${pct(a.wow)}</b></div><div class="cell"><small>点赞</small><b>${fmt(a.likes)}</b></div><div class="cell"><small>评论</small><b>${fmt(a.comments)}</b></div></div><section class="sec"><h2>账号情报</h2><div class="muted">定位：${a.position||'—'}<br>角色：${a.role||'—'}<br>更新：${a.statsFreq||a.currentFreq||'—'}<br>状态：${a.currentStatus||a.statsRemark||'正常'}<br>负责人：${a.currentOwner||a.owner||'—'}${a.acquisition?`<br>获客：${a.acquisition.group}`:''}${a.dataQualityNote?`<br>数据质量：${a.dataQualityNote}`:''}</div></section>${worksHtml(a)}`;document.getElementById('drawer').classList.add('show')}
+function worksHtml(a){
+ const p=a.publicSearchV4||{},w=p.recentWorks||[],hist=p.historicalEvidence||[];
+ if(!w.length && !hist.length) return '';
+ let body='';
+ if(w.length){
+   body=`<div class="works">${w.map(x=>`<div class="work">
+     ${x.coverData?`<img src="${x.coverData}">`:`<div class="fake">${x.title||'作品数据卡'}</div>`}
+     <div class="cap">${x.coverData?(x.title||''):''}<div class="metrics">
+       ${x.play!=null?`<span>播 ${fmt(x.play)}</span>`:''}
+       ${x.likes!=null?`<span>赞 ${fmt(x.likes)}</span>`:''}
+       ${x.comments!=null?`<span>评 ${fmt(x.comments)}</span>`:''}
+       ${x.shares!=null?`<span>转 ${fmt(x.shares)}</span>`:''}
+       ${x.favorites!=null?`<span>藏 ${fmt(x.favorites)}</span>`:''}
+       ${x.followGain!=null?`<span>涨粉 ${fmt(x.followGain)}</span>`:''}
+     </div></div></div>`).join('')}</div>`;
+ }
+ const histHtml=hist.map(x=>`<div class="decision"><b>历史公域命中：${x.title}</b><p>${x.metric||''} · ${x.source||''}</p></div>`).join('');
+ return `<section class="sec"><h2>${w.length?'近7日作品呈现':'公域作品命中'}</h2>
+   ${p.summary?`<div class="signal">${p.summary}</div>`:''}
+   ${body}${histHtml}</section>`;
+}
+function openAccount(a){document.getElementById('drawerBody').innerHTML=`<div class="hero">${av(a)}<div><h2>${a.name}</h2><div class="muted">${a.platform} · ${a.grade}级<br>模板：${a.template||'—'}</div></div></div><div class="signal ${a.decisionColor||''}"><b>${a.decisionAction||'常规测试'}</b><br>${a.decisionDetail||''}</div><div class="intel"><div class="cell"><small>周播放</small><b>${fmt(a.play)}</b></div><div class="cell"><small>周涨粉</small><b>${fmt(a.netFollow)}</b></div><div class="cell"><small>对自身基准</small><b>${idx(a.performanceIndex)}</b></div><div class="cell"><small>周环比</small><b>${pct(a.wow)}</b></div><div class="cell"><small>点赞</small><b>${fmt(a.likes)}</b></div><div class="cell"><small>评论</small><b>${fmt(a.comments)}</b></div></div><section class="sec"><h2>账号情报</h2><div class="muted">定位：${a.position||'—'}<br>角色：${a.role||'—'}<br>更新：${a.statsFreq||a.currentFreq||'—'}<br>状态：${a.currentStatus||a.statsRemark||'正常'}<br>负责人：${a.currentOwner||a.owner||'—'}${a.acquisition?`<br>获客：${a.acquisition.group}`:''}${a.dataQualityNote?`<br>数据质量：${a.dataQualityNote}`:''}</div></section>${worksHtml(a)}`;document.getElementById('drawer').classList.add('show')}
 function closeDrawer(){document.getElementById('drawer').classList.remove('show')}
 load();render();
 </script></body></html>
